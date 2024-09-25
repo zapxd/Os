@@ -17,7 +17,7 @@ void main() {
     }
 
     // Input for allocated resources for each process
-    printf("Enter the Allocated resource for each process:\n");
+    printf("Enter the allocated resource for each process:\n");
     for (int i = 0; i < n; i++) {
         printf("Allocated for Process %d: ", i + 1);
         scanf("%d", &allocate[i]);
@@ -31,15 +31,21 @@ void main() {
     int count = 0, sequence = 0;  // Variables to track processes left and executed
     int ans[n], ind = 0;  // Array to store the safe sequence, and index counter
 
+    // Array to keep track of finished processes
+    int finished[n];
+    for (int i = 0; i < n; i++) {
+        finished[i] = 0;  // Initialize all processes as not finished
+    }
+
     while (count < n) {
         int found = 0;
         for (int j = 0; j < n; j++) {
-            if (need[j] <= available && need[j] != 0) {
+            if (finished[j] == 0 && need[j] <= available) {  // Process can execute if it hasn't finished and its need <= available
                 ans[ind++] = j + 1;  // Add process to the safe sequence
                 sequence++;  // Increment sequence
                 count++;  // Process has safely executed
                 available += allocate[j];  // Update available resources
-                need[j] = 0;  // Mark process as executed by setting need to 0
+                finished[j] = 1;  // Mark process as finished
                 found = 1;  // A process was found and executed
             }
         }
@@ -54,7 +60,10 @@ void main() {
         printf("\nThe system is in a safe state!!\n");
         printf("Safe sequence is: ");
         for (int i = 0; i < n; i++) {
-            printf("P%d -> ", ans[i]);
+            printf("P%d", ans[i]);
+            if (i < n - 1) {
+                printf(" -> ");  // Print arrow between processes
+            }
         }
         printf("\n");
     }
