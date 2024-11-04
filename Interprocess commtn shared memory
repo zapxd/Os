@@ -1,0 +1,45 @@
+client.c
+
+
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <wait.h>
+#include <unistd.h>
+
+#define MAXSIZE 1024  // Define MAXSIZE
+
+void die(char *s) {
+    perror(s);
+    exit(1);
+}
+
+int main() {
+    int shmid;
+    key_t key;
+    char *shm, *s;
+
+    key = 5678;
+
+    if ((shmid = shmget(key, MAXSIZE, 0666)) < 0)
+        die("shmget");
+
+    if ((shm = shmat(shmid, NULL, 0)) == (char *) -1)
+        die("shmat");
+
+    // Now read what the server put in the memory.
+    for (s = shm; *s != '\0'; s++)  // Change '0' to '\0'
+        putchar(*s);
+
+    putchar('\n');  // Change '\\n' to '\n'
+    *shm = '*';
+    shmdt(shm);  // Detach the shared memory segment
+    shmctl(shmid, IPC_RMID, NULL);  // Remove the shared memory segment
+    exit(0);
+}
+
+
+
+server.c
